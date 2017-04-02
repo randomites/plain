@@ -11,7 +11,7 @@ use std::prelude::*;
 /// A trait for plain reinterpretable data.
 ///
 /// A type can be Plain if it is #repr(C) and only contains
-/// data with no possible invalid values. Specifically, 
+/// data with no possible invalid values. Specifically,
 /// bool, char, enums, tuples, pointers and references are not
 /// Plain. On the other hand, statically sized arrays
 /// of Plain type, and structures where all members
