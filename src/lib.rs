@@ -5,9 +5,6 @@
 #[macro_use]
 extern crate std;
 
-#[cfg(test)]
-use std::prelude::*;
-
 /// A trait for plain reinterpretable data.
 ///
 /// A type can be Plain if it is #repr(C) and only contains
