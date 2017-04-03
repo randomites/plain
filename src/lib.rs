@@ -1,3 +1,89 @@
+//! A small Rust library that allows users to reinterpret data of certain types safely.
+//!
+//! This crate provides an unsafe trait [`Plain`](trait.Plain.html), which the user
+//! of the crate uses to mark types for which operations of this library are safe.
+//! See [`Plain`](trait.Plain.html) for the contractual obligation.
+//!
+//! Other than that, everything else in this crate is perfectly safe to use as long
+//! as the `Plain` trait is not implemented on inadmissible types (similar to how
+//! `Send` and `Sync` in the standard library work).
+//!
+//! 
+//!
+//! # Examples
+//!
+//! To start using the crate, simply do `extern crate plain;`.
+//!
+//! If you want your plain types to have methods from this crate, also include `use plain.Methods;`.
+//!
+//! Then it's just a matter of marking the right types and using them.
+//!
+//! ```
+//!
+//! extern crate plain;
+//! use plain::Methods;
+//!
+//!
+//!
+//! #[repr(C)]
+//! #[derive(Default)]
+//! struct ELF64Header {
+//!     pub e_ident: [u8; 16],
+//!     pub e_type: u16,
+//!     pub e_machine: u16,
+//!     pub e_version: u32,
+//!     pub e_entry: u64,
+//!     pub e_phoff: u64,
+//!     pub e_shoff: u64,
+//!     pub e_flags: u32,
+//!     pub e_ehsize: u16,
+//!     pub e_phentsize: u16,
+//!     pub e_phnum: u16,
+//!     pub e_shentsize: u16,
+//!     pub e_shnum: u16,
+//!     pub e_shstrndx: u16,
+//! }
+//! 
+//! // SAFE: ELF64Header satisfies all the requirements of `Plain`.
+//! unsafe impl plain::Plain for ELF64Header {}
+//! 
+//! fn reinterpret_buffer(buf: &[u8]) -> &ELF64Header {
+//!     match plain::from_bytes(buf) {
+//!         Err(_) => panic!("The buffer is either too short or not aligned!"),
+//!         Ok(elfref) => elfref, 
+//!     }
+//! }
+//! 
+//! fn copy_from_buffer(buf: &[u8]) -> ELF64Header {
+//!     let mut h = ELF64Header::default();
+//!     h.as_mut_bytes().copy_from_slice(buf);
+//!     h
+//! }
+//! 
+//! #[repr(C)]
+//! struct ArrayEntry {
+//!     pub name: [u8; 64],
+//!     pub tag: u32,
+//!     pub score: u32, 
+//! }
+//! 
+//! // SAFE: ArrayEntry satisfies all the requirements of `Plain`.
+//! unsafe impl plain::Plain for ArrayEntry {}
+//! 
+//! fn array_from_bytes(buf: &[u8]) -> &[ArrayEntry] {
+//!     // NOTE: length is not a concern here,
+//!     // since from_bytes() can return empty slice.
+//! 
+//!     match plain::from_bytes(buf) {
+//!         Err(_) => panic!("The buffer is not aligned!"),
+//!         Ok(arr) => arr, 
+//!     }
+//! }
+//!
+//! # fn main() {}
+//!
+//! ```
+//!
 
 #![no_std]
 
@@ -7,12 +93,11 @@ extern crate std;
 
 /// A trait for plain reinterpretable data.
 ///
-/// A type can be Plain if it is #repr(C) and only contains
+/// A type can be [`Plain`](trait.Plain.html) if it is `#repr(C)` and only contains
 /// data with no possible invalid values. Specifically,
-/// bool, char, enums, tuples, pointers and references are not
-/// Plain. On the other hand, statically sized arrays
-/// of Plain type, and structures where all members
-/// are Plain, are usually okay.
+/// `bool`, `char`, `enum`s, tuples, pointers and references are not
+/// `Plain`. On the other hand, arrays of a `Plain` type, and
+/// structures where all members are plain, are usually okay.
 ///
 pub unsafe trait Plain {}
 
@@ -36,77 +121,3 @@ unsafe impl<S> Plain for [S] where S: Plain {}
 
 mod methods;
 pub use self::methods::*;
-
-
-/*
-pub trait Slice {
-    /// Converts reference to one Plain type into another,
-    /// automatically determining appropriate length if
-    /// T is an array.
-    ///
-    fn reinterpret<T>(&self) -> &[T]
-        where T: Plain;
-
-    /// Converts slice of one type into a slice of another,
-    /// with output length provided as argument.
-    ///
-    /// == Panics ==
-    /// The function will panic if the requested length 
-    /// can't be satisfied by input slice.
-    ///
-    unsafe fn reinterpret_with_len<T>(&self, len: usize) -> &[T]
-        where T: Copy;
-
-    /// Converts a slice to a slice of bytes.
-    fn as_bytes(&self) -> &[u8];
-    
-    /// Converts a slice into a mutable slice of bytes,
-    /// allowing direct access to the former's representation in memory.
-    ///
-    /// == Safety ==
-    /// It is not safe to modify bytes that correspond to types with
-    /// invalid values. In particular, the input slice shouldn't contain values
-    /// of bool or enum types. If such values are present, they must not be
-    /// modified in a way that results in invalid values.
-    ///
-    unsafe fn as_mut_bytes(&mut self) -> &mut [u8];
-}
-
-
-
-impl<S> Slice for [S] where S: Plain {
-
-    fn reinterpret<T>(&self) -> &[T]
-        where T: Plain {
-        /// This function is safe as long as the result type is
-        /// a Copy type and doesn't have any invalid values.
-        /// In particular, the result type shouldn't contain any
-        /// bool or enum value. The Plain trait encodes this requirement.
-    
-        let byte_len = self.len() * size_of::<S>();
-        let new_len = byte_len / size_of::<T>();
-        unsafe { from_raw_parts(self.as_ptr() as *const T, new_len) }
-    }
-
-    unsafe fn reinterpret_with_len<T>(&self, len: usize) -> &[T]
-        where T: Copy {
-
-        let byte_len = self.len() * size_of::<S>();
-        let new_len = byte_len / size_of::<T>();
-        assert!(len <= new_len);	
-        from_raw_parts(self.as_ptr() as *const T, len)
-    }
-
-    fn as_bytes(&self) -> &[u8] {
-        // SAFE: So long as the slice is immutable, and we don't overshoot the length,
-        // it is safe to view the memory as bytes.
-        unsafe {
-            from_raw_parts(self.as_ptr() as *const u8, self.len() * size_of::<S>())
-        }
-    }
-    
-    unsafe fn as_mut_bytes(&mut self) -> &mut [u8] {
-        from_raw_parts_mut(self.as_mut_ptr() as *mut u8, self.len() * size_of::<S>())
-    }
-}
-*/
