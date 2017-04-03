@@ -19,34 +19,6 @@ pub trait Methods: Plain {
     fn as_mut_bytes(&mut self) -> &mut [u8] {
         self::as_mut_bytes(self)
     }
-
-    #[inline]
-    fn reinterpret<T>(&self) -> &T
-        where T: Methods + ?Sized
-    {
-        self::reinterpret(self)
-    }
-
-    #[inline]
-    fn reinterpret_with_len<T>(&self, max_items: usize) -> &[T]
-        where T: Methods
-    {
-        self::reinterpret_with_len(self, max_items)
-    }
-
-    #[inline]
-    fn reintepret_mut<T>(&mut self) -> &mut T
-        where T: Methods + ?Sized
-    {
-        self::reinterpret_mut(self)
-    }
-
-    #[inline]
-    fn reintepret_mut_with_len<T>(&mut self, max_items: usize) -> &mut [T]
-        where T: Methods
-    {
-        self::reinterpret_mut_with_len(self, max_items)
-    }
 }
 
 impl<S> Methods for S
@@ -119,54 +91,6 @@ pub fn as_mut_bytes<S>(s: &mut S) -> &mut [u8]
     unsafe { slice::from_raw_parts_mut(bptr, bsize) }
 }
 
-#[inline]
-pub fn reinterpret<T, S>(s: &S) -> &T
-    where S: ?Sized,
-          T: Methods + ?Sized
-{
-    T::from_bytes(as_bytes(s))
-}
-
-#[inline]
-pub fn reinterpret_mut<T, S>(s: &mut S) -> &mut T
-    where S: Plain + ?Sized,
-          T: Methods + ?Sized
-{
-    T::from_mut_bytes(as_mut_bytes(s))
-}
-
-#[inline]
-pub fn reinterpret_with_len<T, S>(s: &S, max_items: usize) -> &[T]
-    where S: ?Sized,
-          T: Methods
-{
-    let bytes = as_bytes(s);
-    let max_len = mem::size_of::<T>() * max_items;
-    let bytes2;
-    if bytes.len() > max_len {
-        bytes2 = &bytes[..max_len];
-    } else {
-        bytes2 = bytes;
-    };
-    <[T]>::from_bytes(bytes2)
-}
-
-#[inline]
-pub fn reinterpret_mut_with_len<T, S>(s: &mut S, max_items: usize) -> &mut [T]
-    where S: Plain + ?Sized,
-          T: Methods
-{
-    let bytes = as_mut_bytes(s);
-    let max_len = mem::size_of::<T>() * max_items;
-    let bytes2;
-    if bytes.len() > max_len {
-        bytes2 = &mut bytes[..max_len];
-    } else {
-        bytes2 = bytes;
-    };
-    <[T]>::from_mut_bytes(bytes2)
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -223,7 +147,7 @@ mod tests {
         // Assert fails inside.
         Dummy1::from_bytes(&b);
     }
-
+/*
     #[test]
     fn basic_function() {
         let t1 = Dummy1 {
@@ -258,4 +182,5 @@ mod tests {
         assert!(r6.len() == 1);
         assert!(t1 == r6[0]);
     }
+*/
 }
