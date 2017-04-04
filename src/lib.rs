@@ -8,8 +8,6 @@
 //! as the `Plain` trait is not implemented on inadmissible types (similar to how
 //! `Send` and `Sync` in the standard library work).
 //!
-//! 
-//!
 //! # Examples
 //!
 //! To start using the crate, simply do `extern crate plain;`.
@@ -84,6 +82,22 @@
 //!
 //! ```
 //!
+//! # Comparison to [`pod`](https://crates.io/crates/pod)
+//!
+//! [`pod`](https://crates.io/crates/pod) is another crate created to help working with plain data.
+//! The major difference between `pod` and `plain` is scope.
+//!
+//! `plain` currently provides only four functions (+method wrappers) and its implementation involves
+//! mere six lines of unsafe code. It can be used in `no_std` code. Also, it doesn't
+//! deal with [endianness](https://en.wikipedia.org/wiki/Endianness) in any way,
+//! so it is only suitable for certain kinds of low-level work.
+//!
+//! `pod`, on the other hand, provides a wide arsenal
+//! of various methods, most of which may be unnecessary for a given use case.
+//! It has dependencies on `std` as well as other crates, but among other things
+//! it provides tools to handle endianness properly.
+//!
+//! In short, `plain` is much, much _plainer_...
 
 #![no_std]
 
