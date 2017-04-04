@@ -9,5 +9,6 @@ homepage = "https://github.com/randomites/plain"
 documentation = "https://docs.rs/plain"
 description = "A small Rust library that allows users to reinterpret data of certain types safely."
 
-
+categories = ["no-std", "data-structures", "parsing"]
+keywords = ["plain", "pod", "ffi", "memory"]
 
