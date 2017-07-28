@@ -1,7 +1,7 @@
 [package]
 name = "plain"
-version = "0.1.0"
-authors = ["Jiri Zarevucky <zarevucky.jiri@gmail.com>"]
+version = "0.2.0"
+authors = ["jzr"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/randomites/plain"
