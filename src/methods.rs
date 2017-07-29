@@ -1,17 +1,17 @@
 
 use core::{mem, slice};
 
-use ::{Error, Plain};
+use {Error, Plain};
 
 /// Check if a byte slice is aligned suitably for type T.
 #[inline]
 pub fn is_aligned<T>(bytes: &[u8]) -> bool {
-	((bytes.as_ptr() as usize) % mem::align_of::<T>()) == 0
+    ((bytes.as_ptr() as usize) % mem::align_of::<T>()) == 0
 }
 
 #[inline(always)]
 fn check_alignment<T>(bytes: &[u8]) -> Result<(), Error> {
-    if is_aligned::<T>(bytes){
+    if is_aligned::<T>(bytes) {
         Ok(())
     } else {
         Err(Error::BadAlignment)
@@ -27,19 +27,23 @@ fn check_length<T>(bytes: &[u8], len: usize) -> Result<(), Error> {
     }
 }
 
+/// Interpret data as bytes. Not safe for data with padding.
 #[inline(always)]
-#[allow(dead_code)]
-pub(crate) unsafe fn as_bytes<S>(s: &S) -> &[u8]
-    where S: ?Sized
+pub unsafe fn as_bytes<S>(s: &S) -> &[u8]
+where
+    S: ?Sized,
 {
     let bptr = s as *const S as *const u8;
     let bsize = mem::size_of_val(s);
     slice::from_raw_parts(bptr, bsize)
 }
 
+/// Interpret data as mutable bytes.
+/// Reading is not safe for data with padding. Writing is ok.
 #[inline(always)]
-pub(crate) unsafe fn as_mut_bytes<S>(s: &mut S) -> &mut [u8]
-    where S: Plain + ?Sized
+pub unsafe fn as_mut_bytes<S>(s: &mut S) -> &mut [u8]
+where
+    S: Plain + ?Sized,
 {
     let bptr = s as *mut S as *mut u8;
     let bsize = mem::size_of_val(s);
@@ -66,7 +70,8 @@ pub(crate) unsafe fn as_mut_bytes<S>(s: &mut S) -> &mut [u8]
 ///
 #[inline]
 pub fn from_bytes<T>(bytes: &[u8]) -> Result<&T, Error>
-    where T: Plain
+where
+    T: Plain,
 {
     try!(check_alignment::<T>(bytes));
     try!(check_length::<T>(bytes, 1));
@@ -99,7 +104,8 @@ pub fn from_bytes<T>(bytes: &[u8]) -> Result<&T, Error>
 ///
 #[inline]
 pub fn slice_from_bytes<T>(bytes: &[u8]) -> Result<&[T], Error>
-    where T: Plain
+where
+    T: Plain,
 {
     let len = bytes.len() / mem::size_of::<T>();
     slice_from_bytes_len(bytes, len)
@@ -114,11 +120,14 @@ pub fn slice_from_bytes<T>(bytes: &[u8]) -> Result<&[T], Error>
 ///
 #[inline]
 pub fn slice_from_bytes_len<T>(bytes: &[u8], len: usize) -> Result<&[T], Error>
-    where T: Plain
+where
+    T: Plain,
 {
     try!(check_alignment::<T>(bytes));
     try!(check_length::<T>(bytes, len));
-    Ok(unsafe { slice::from_raw_parts(bytes.as_ptr() as *const T, len) })
+    Ok(unsafe {
+        slice::from_raw_parts(bytes.as_ptr() as *const T, len)
+    })
 }
 
 /// See [`from_bytes()`](fn.from_bytes.html).
@@ -127,7 +136,8 @@ pub fn slice_from_bytes_len<T>(bytes: &[u8], len: usize) -> Result<&[T], Error>
 ///
 #[inline]
 pub fn from_mut_bytes<T>(bytes: &mut [u8]) -> Result<&mut T, Error>
-    where T: Plain
+where
+    T: Plain,
 {
     try!(check_alignment::<T>(bytes));
     try!(check_length::<T>(bytes, 1));
@@ -140,7 +150,8 @@ pub fn from_mut_bytes<T>(bytes: &mut [u8]) -> Result<&mut T, Error>
 ///
 #[inline]
 pub fn slice_from_mut_bytes<T>(bytes: &mut [u8]) -> Result<&mut [T], Error>
-    where T: Plain
+where
+    T: Plain,
 {
     let len = bytes.len() / mem::size_of::<T>();
     slice_from_mut_bytes_len(bytes, len)
@@ -152,11 +163,14 @@ pub fn slice_from_mut_bytes<T>(bytes: &mut [u8]) -> Result<&mut [T], Error>
 ///
 #[inline]
 pub fn slice_from_mut_bytes_len<T>(bytes: &mut [u8], len: usize) -> Result<&mut [T], Error>
-    where T: Plain
+where
+    T: Plain,
 {
     try!(check_alignment::<T>(bytes));
     try!(check_length::<T>(bytes, len));
-    Ok(unsafe { slice::from_raw_parts_mut(bytes.as_ptr() as *mut T, len) })
+    Ok(unsafe {
+        slice::from_raw_parts_mut(bytes.as_ptr() as *mut T, len)
+    })
 }
 
 /// Copies data from a byte slice into existing memory.
@@ -167,18 +181,18 @@ pub fn slice_from_mut_bytes_len<T>(bytes: &mut [u8], len: usize) -> Result<&mut 
 ///
 #[inline]
 pub fn copy_from_bytes<T>(into: &mut T, bytes: &[u8]) -> Result<(), Error>
-	where T: Plain + ?Sized
+where
+    T: Plain + ?Sized,
 {
-	let sz = mem::size_of_val(into);
+    let sz = mem::size_of_val(into);
 
-	if bytes.len() < sz {
-		return Err(Error::TooShort);
-	}
+    if bytes.len() < sz {
+        return Err(Error::TooShort);
+    }
 
-	unsafe {
-		as_mut_bytes(into).copy_from_slice(&bytes[..sz]);
-	}
+    unsafe {
+        as_mut_bytes(into).copy_from_slice(&bytes[..sz]);
+    }
 
-	Ok(())
+    Ok(())
 }
-

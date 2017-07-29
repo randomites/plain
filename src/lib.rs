@@ -10,7 +10,7 @@
 //! `Send` and `Sync` in the standard library work).
 //!
 //! # Purpose
-//! 
+//!
 //! In low level systems development, it is sometimes necessary to
 //! interpret locations in memory as data structures. Functions of
 //! this crate serve to avoid pitfalls associated with that, without
@@ -73,7 +73,7 @@
 //!			h
 //!		}
 //! }
-//! 
+//!
 //! # fn process_elf(elf: &ELF64Header) {}
 //!
 //! // Conditional copying for ultimate hackery.
@@ -137,7 +137,6 @@
 //! it provides tools to handle endianness properly.
 //!
 //! In short, `plain` is much, much _plainer_...
-
 #![no_std]
 
 mod error;
@@ -147,16 +146,9 @@ mod plain;
 pub use plain::Plain;
 
 mod methods;
-pub use methods::{
-	is_aligned,
-	from_bytes,
-	slice_from_bytes,
-	slice_from_bytes_len,
-	from_mut_bytes,
-	slice_from_mut_bytes,
-	slice_from_mut_bytes_len,
-	copy_from_bytes,
-};
+pub use methods::{as_bytes, as_mut_bytes, copy_from_bytes, from_bytes, from_mut_bytes, is_aligned,
+                  slice_from_bytes, slice_from_bytes_len, slice_from_mut_bytes,
+                  slice_from_mut_bytes_len};
 
 #[cfg(test)]
 #[macro_use]

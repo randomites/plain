@@ -30,16 +30,16 @@ struct Dummy2 {
 unsafe impl Plain for Dummy2 {}
 
 fn as_bytes<T: ?Sized>(r: &T) -> &[u8] {
-	unsafe { methods::as_bytes(r) }
+    unsafe { methods::as_bytes(r) }
 }
 
 fn as_mut_bytes<T: Plain + ?Sized>(r: &mut T) -> &mut [u8] {
-	unsafe { methods::as_mut_bytes(r) }
+    unsafe { methods::as_mut_bytes(r) }
 }
 
 #[test]
 fn one_too_short() {
-    let b = vec![0u8; mem::size_of::<Dummy1>()-1];
+    let b = vec![0u8; mem::size_of::<Dummy1>() - 1];
 
     let r = Dummy1::from_bytes(&b);
     assert!(r == Err(Error::TooShort));
@@ -47,7 +47,7 @@ fn one_too_short() {
 
 #[test]
 fn unaligned() {
-    let b = vec![0u8; mem::size_of::<Dummy1>()+1];
+    let b = vec![0u8; mem::size_of::<Dummy1>() + 1];
     let b = &b[1..];
 
     let r = Dummy1::from_bytes(&b);
@@ -75,7 +75,7 @@ fn copy_test() {
     assert!(t2.field5 == 0xbbbbbbbbccccddeeu64 || t2.field5 == 0xeeddccccbbbbbbbbu64);
 
     let sz = mem::size_of::<Dummy2>();
-    assert!(t2.copy_from_bytes(&as_bytes(&t1)[..sz-1]) == Err(Error::TooShort));
+    assert!(t2.copy_from_bytes(&as_bytes(&t1)[..sz - 1]) == Err(Error::TooShort));
 }
 
 #[test]
@@ -108,16 +108,16 @@ fn basic_function() {
 
     let r5 = from_bytes::<Dummy2>(as_bytes(r4)).unwrap();
 
-	{
-		let r6 = slice_from_bytes::<Dummy1>(as_bytes(r5)).unwrap();
+    {
+        let r6 = slice_from_bytes::<Dummy1>(as_bytes(r5)).unwrap();
 
-		assert!(r6.len() == 1);
-		assert!(t1 == r6[0]);
-	}
+        assert!(r6.len() == 1);
+        assert!(t1 == r6[0]);
+    }
 
-	let r7 = slice_from_bytes::<u64>(as_bytes(r5)).unwrap();
-	assert!(r7.len() == 2);
+    let r7 = slice_from_bytes::<u64>(as_bytes(r5)).unwrap();
+    assert!(r7.len() == 2);
 
-	assert!(r7[0] == 0xaaaaaaaaaaaaaaaau64);
-	assert!(r7[1] == 0xbbbbbbbbccccddeeu64 || r7[1] == 0xeeddccccbbbbbbbbu64);
+    assert!(r7[0] == 0xaaaaaaaaaaaaaaaau64);
+    assert!(r7[1] == 0xbbbbbbbbccccddeeu64 || r7[1] == 0xeeddccccbbbbbbbbu64);
 }
