@@ -20,7 +20,7 @@ fn check_alignment<T>(bytes: &[u8]) -> Result<(), Error> {
 
 #[inline(always)]
 fn check_length<T>(bytes: &[u8], len: usize) -> Result<(), Error> {
-    if bytes.len() / mem::size_of::<T>() < len {
+    if mem::size_of::<T>() > 0 && (bytes.len() / mem::size_of::<T>()) < len {
         Err(Error::TooShort)
     } else {
         Ok(())
