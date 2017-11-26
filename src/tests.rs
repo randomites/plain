@@ -80,13 +80,17 @@ fn copy_test() {
 fn huge_array() {
     // Issue #2: Integer overflow in multiplication.
 
-    const HUGE: usize = 1 << 63;
+    let huge: usize = match mem::size_of::<usize>() {
+        4 => 1 << 31,
+        8 => 1 << 63,
+        _ => panic!("Unknown size of usize."),
+    };
 
     let mut b = vec![0u8];
-    assert_eq!(slice_from_bytes_len::<u32>(&b, HUGE), Err(Error::TooShort));
+    assert_eq!(slice_from_bytes_len::<u32>(&b, huge), Err(Error::TooShort));
 
     assert_eq!(
-        slice_from_mut_bytes_len::<u32>(&mut b, HUGE),
+        slice_from_mut_bytes_len::<u32>(&mut b, huge),
         Err(Error::TooShort)
     );
 }
