@@ -1,5 +1,3 @@
-
-
 #![allow(dead_code)]
 
 use ::*;
@@ -76,6 +74,21 @@ fn copy_test() {
 
     let sz = mem::size_of::<Dummy2>();
     assert!(t2.copy_from_bytes(&as_bytes(&t1)[..sz - 1]) == Err(Error::TooShort));
+}
+
+#[test]
+fn huge_array() {
+    // Issue #2: Integer overflow in multiplication.
+
+    const HUGE: usize = 1 << 63;
+
+    let mut b = vec![0u8];
+    assert_eq!(slice_from_bytes_len::<u32>(&b, HUGE), Err(Error::TooShort));
+
+    assert_eq!(
+        slice_from_mut_bytes_len::<u32>(&mut b, HUGE),
+        Err(Error::TooShort)
+    );
 }
 
 #[test]
