@@ -1,4 +1,3 @@
-
 use core::{mem, slice};
 
 use {Error, Plain};
