@@ -35,8 +35,7 @@ If you want your plain types to have methods from this crate, also include `use 
 
 Then it's just a matter of marking the right types and using them.
 
-```
-
+```rust
 extern crate plain;
 use plain::Plain;
 use std::mem;
