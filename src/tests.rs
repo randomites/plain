@@ -134,3 +134,12 @@ fn basic_function() {
     assert!(r7[0] == 0xaaaaaaaaaaaaaaaau64);
     assert!(r7[1] == 0xbbbbbbbbccccddeeu64 || r7[1] == 0xeeddccccbbbbbbbbu64);
 }
+
+#[test]
+fn arrays() {
+    fn is_plain<T: Plain>(_: T) {}
+
+    is_plain([0u8; 1]);
+    is_plain([0u8; 17]);
+    is_plain([0u8; 32]);
+}
