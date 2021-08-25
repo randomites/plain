@@ -1,4 +1,7 @@
-use Error;
+use crate::{
+    copy_from_bytes, from_bytes, from_mut_bytes, slice_from_bytes, slice_from_bytes_len,
+    slice_from_mut_bytes, slice_from_mut_bytes_len, Error,
+};
 
 /// A trait for plain data types that can be safely read from a byte slice.
 ///
@@ -24,27 +27,16 @@ use Error;
 ///
 pub unsafe trait Plain {
     #[inline(always)]
+    fn copy_from_bytes(&mut self, bytes: &[u8]) -> Result<(), Error> {
+        copy_from_bytes(self, bytes)
+    }
+
+    #[inline(always)]
     fn from_bytes(bytes: &[u8]) -> Result<&Self, Error>
     where
         Self: Sized,
     {
-        ::from_bytes(bytes)
-    }
-
-    #[inline(always)]
-    fn slice_from_bytes(bytes: &[u8]) -> Result<&[Self], Error>
-    where
-        Self: Sized,
-    {
-        ::slice_from_bytes(bytes)
-    }
-
-    #[inline(always)]
-    fn slice_from_bytes_len(bytes: &[u8], len: usize) -> Result<&[Self], Error>
-    where
-        Self: Sized,
-    {
-        ::slice_from_bytes_len(bytes, len)
+        from_bytes(bytes)
     }
 
     #[inline(always)]
@@ -52,7 +44,23 @@ pub unsafe trait Plain {
     where
         Self: Sized,
     {
-        ::from_mut_bytes(bytes)
+        from_mut_bytes(bytes)
+    }
+
+    #[inline(always)]
+    fn slice_from_bytes(bytes: &[u8]) -> Result<&[Self], Error>
+    where
+        Self: Sized,
+    {
+        slice_from_bytes(bytes)
+    }
+
+    #[inline(always)]
+    fn slice_from_bytes_len(bytes: &[u8], len: usize) -> Result<&[Self], Error>
+    where
+        Self: Sized,
+    {
+        slice_from_bytes_len(bytes, len)
     }
 
     #[inline(always)]
@@ -60,7 +68,7 @@ pub unsafe trait Plain {
     where
         Self: Sized,
     {
-        ::slice_from_mut_bytes(bytes)
+        slice_from_mut_bytes(bytes)
     }
 
     #[inline(always)]
@@ -68,12 +76,7 @@ pub unsafe trait Plain {
     where
         Self: Sized,
     {
-        ::slice_from_mut_bytes_len(bytes, len)
-    }
-
-    #[inline(always)]
-    fn copy_from_bytes(&mut self, bytes: &[u8]) -> Result<(), Error> {
-        ::copy_from_bytes(self, bytes)
+        slice_from_mut_bytes_len(bytes, len)
     }
 }
 
@@ -89,11 +92,7 @@ unsafe impl Plain for i32 {}
 unsafe impl Plain for i64 {}
 unsafe impl Plain for isize {}
 
-unsafe impl<S> Plain for [S]
-where
-    S: Plain,
-{
-}
+unsafe impl<S> Plain for [S] where S: Plain {}
 
 macro_rules! impl_array {
     ($($n:tt)+) => {

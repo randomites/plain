@@ -1,6 +1,6 @@
 use core::{mem, slice};
 
-use {Error, Plain};
+use crate::{Error, Plain};
 
 /// Check if a byte slice is aligned suitably for type T.
 #[inline]
@@ -72,8 +72,8 @@ pub fn from_bytes<T>(bytes: &[u8]) -> Result<&T, Error>
 where
     T: Plain,
 {
-    try!(check_alignment::<T>(bytes));
-    try!(check_length::<T>(bytes, 1));
+    check_alignment::<T>(bytes)?;
+    check_length::<T>(bytes, 1)?;
     Ok(unsafe { &*(bytes.as_ptr() as *const T) })
 }
 
@@ -110,7 +110,6 @@ where
     slice_from_bytes_len(bytes, len)
 }
 
-
 /// Same as [`slice_from_bytes()`](fn.slice_from_bytes.html),
 /// except that it takes explicit length of the result slice.
 ///
@@ -122,11 +121,9 @@ pub fn slice_from_bytes_len<T>(bytes: &[u8], len: usize) -> Result<&[T], Error>
 where
     T: Plain,
 {
-    try!(check_alignment::<T>(bytes));
-    try!(check_length::<T>(bytes, len));
-    Ok(unsafe {
-        slice::from_raw_parts(bytes.as_ptr() as *const T, len)
-    })
+    check_alignment::<T>(bytes)?;
+    check_length::<T>(bytes, len)?;
+    Ok(unsafe { slice::from_raw_parts(bytes.as_ptr() as *const T, len) })
 }
 
 /// See [`from_bytes()`](fn.from_bytes.html).
@@ -138,8 +135,8 @@ pub fn from_mut_bytes<T>(bytes: &mut [u8]) -> Result<&mut T, Error>
 where
     T: Plain,
 {
-    try!(check_alignment::<T>(bytes));
-    try!(check_length::<T>(bytes, 1));
+    check_alignment::<T>(bytes)?;
+    check_length::<T>(bytes, 1)?;
     Ok(unsafe { &mut *(bytes.as_mut_ptr() as *mut T) })
 }
 
@@ -165,11 +162,9 @@ pub fn slice_from_mut_bytes_len<T>(bytes: &mut [u8], len: usize) -> Result<&mut 
 where
     T: Plain,
 {
-    try!(check_alignment::<T>(bytes));
-    try!(check_length::<T>(bytes, len));
-    Ok(unsafe {
-        slice::from_raw_parts_mut(bytes.as_ptr() as *mut T, len)
-    })
+    check_alignment::<T>(bytes)?;
+    check_length::<T>(bytes, len)?;
+    Ok(unsafe { slice::from_raw_parts_mut(bytes.as_ptr() as *mut T, len) })
 }
 
 /// Copies data from a byte slice into existing memory.

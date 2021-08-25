@@ -1,7 +1,11 @@
 #![allow(dead_code)]
 
-use ::*;
 use core::mem;
+
+use crate::{
+    from_bytes, methods, slice_from_bytes, slice_from_bytes_len, slice_from_mut_bytes_len, Error,
+    Plain,
+};
 
 #[repr(C)]
 #[derive(Debug, Default, Copy, Eq, Clone, PartialEq)]
@@ -48,7 +52,7 @@ fn unaligned() {
     let b = vec![0u8; mem::size_of::<Dummy1>() + 1];
     let b = &b[1..];
 
-    let r = Dummy1::from_bytes(&b);
+    let r = Dummy1::from_bytes(b);
     assert!(r == Err(Error::BadAlignment));
 }
 
