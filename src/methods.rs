@@ -32,7 +32,7 @@ pub unsafe fn as_bytes<S>(s: &S) -> &[u8]
 where
     S: ?Sized,
 {
-    let bptr = s as *const S as *const u8;
+    let bptr = (s as *const S).cast::<u8>();
     let bsize = mem::size_of_val(s);
     slice::from_raw_parts(bptr, bsize)
 }
@@ -44,7 +44,7 @@ pub unsafe fn as_mut_bytes<S>(s: &mut S) -> &mut [u8]
 where
     S: Plain + ?Sized,
 {
-    let bptr = s as *mut S as *mut u8;
+    let bptr = (s as *mut S).cast::<u8>();
     let bsize = mem::size_of_val(s);
     slice::from_raw_parts_mut(bptr, bsize)
 }
@@ -74,7 +74,7 @@ where
 {
     check_alignment::<T>(bytes)?;
     check_length::<T>(bytes, 1)?;
-    Ok(unsafe { &*(bytes.as_ptr() as *const T) })
+    Ok(unsafe { &*(bytes.as_ptr().cast::<T>()) })
 }
 
 /// Similar to [`from_bytes()`](fn.from_bytes.html),
@@ -123,7 +123,7 @@ where
 {
     check_alignment::<T>(bytes)?;
     check_length::<T>(bytes, len)?;
-    Ok(unsafe { slice::from_raw_parts(bytes.as_ptr() as *const T, len) })
+    Ok(unsafe { slice::from_raw_parts(bytes.as_ptr().cast::<T>(), len) })
 }
 
 /// See [`from_bytes()`](fn.from_bytes.html).
@@ -137,7 +137,7 @@ where
 {
     check_alignment::<T>(bytes)?;
     check_length::<T>(bytes, 1)?;
-    Ok(unsafe { &mut *(bytes.as_mut_ptr() as *mut T) })
+    Ok(unsafe { &mut *(bytes.as_mut_ptr().cast::<T>()) })
 }
 
 /// See [`slice_from_bytes()`](fn.slice_from_bytes.html).
