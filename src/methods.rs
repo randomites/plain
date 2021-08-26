@@ -5,7 +5,7 @@ use crate::{Error, Plain};
 /// Check if a byte slice is aligned suitably for type T.
 #[inline]
 pub fn is_aligned<T>(bytes: &[u8]) -> bool {
-    bytes.as_ptr().align_offset(mem::align_of::<T>()) == 0
+    ((bytes.as_ptr() as usize) % mem::align_of::<T>()) == 0
 }
 
 #[inline(always)]
