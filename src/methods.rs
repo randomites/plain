@@ -18,7 +18,7 @@ fn check_alignment<T>(bytes: &[u8]) -> Result<(), Error> {
 }
 
 #[inline(always)]
-fn check_length<T>(bytes: &[u8], len: usize) -> Result<(), Error> {
+const fn check_length<T>(bytes: &[u8], len: usize) -> Result<(), Error> {
     if mem::size_of::<T>() > 0 && (bytes.len() / mem::size_of::<T>()) < len {
         Err(Error::TooShort)
     } else {
@@ -164,7 +164,7 @@ where
 {
     check_alignment::<T>(bytes)?;
     check_length::<T>(bytes, len)?;
-    Ok(unsafe { slice::from_raw_parts_mut(bytes.as_ptr() as *mut T, len) })
+    Ok(unsafe { slice::from_raw_parts_mut(bytes.as_mut_ptr().cast::<T>(), len) })
 }
 
 /// Copies data from a byte slice into existing memory.
