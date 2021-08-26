@@ -31,7 +31,6 @@
 //!
 //! ```
 //!
-//! extern crate plain;
 //! use plain::Plain;
 //! use std::mem;
 //!
@@ -59,33 +58,33 @@
 //! unsafe impl Plain for ELF64Header {}
 //!
 //! impl ELF64Header {
-//! 	fn from_bytes(buf: &[u8]) -> &ELF64Header {
-//!			plain::from_bytes(buf).expect("The buffer is either too short or not aligned!")
-//!		}
+//!     fn from_bytes(buf: &[u8]) -> &ELF64Header {
+//!             plain::from_bytes(buf).expect("The buffer is either too short or not aligned!")
+//!         }
 //!
-//!		fn from_mut_bytes(buf: &mut [u8]) -> &mut ELF64Header {
-//!			plain::from_mut_bytes(buf).expect("The buffer is either too short or not aligned!")
-//!		}
+//!         fn from_mut_bytes(buf: &mut [u8]) -> &mut ELF64Header {
+//!             plain::from_mut_bytes(buf).expect("The buffer is either too short or not aligned!")
+//!         }
 //!
-//!		fn copy_from_bytes(buf: &[u8]) -> ELF64Header {
-//!			let mut h = ELF64Header::default();
-//!			h.copy_from_bytes(buf).expect("The buffer is too short!");
-//!			h
-//!		}
+//!         fn copy_from_bytes(buf: &[u8]) -> ELF64Header {
+//!             let mut h = ELF64Header::default();
+//!             h.copy_from_bytes(buf).expect("The buffer is too short!");
+//!             h
+//!         }
 //! }
 //!
 //! # fn process_elf(elf: &ELF64Header) {}
 //!
 //! // Conditional copying for ultimate hackery.
 //! fn opportunistic_elf_processing(buf: &[u8]) {
-//! 	if plain::is_aligned::<ELF64Header>(buf) {
+//!     if plain::is_aligned::<ELF64Header>(buf) {
 //!         // No copy necessary.
-//!			let elf_ref = ELF64Header::from_bytes(buf);
-//!			process_elf(elf_ref);
+//!             let elf_ref = ELF64Header::from_bytes(buf);
+//!             process_elf(elf_ref);
 //!     } else {
 //!         // Not aligned properly, copy to stack first.
-//!			let elf = ELF64Header::copy_from_bytes(buf);
-//!			process_elf(&elf);
+//!             let elf = ELF64Header::copy_from_bytes(buf);
+//!             process_elf(&elf);
 //!     }
 //! }
 //!
@@ -111,10 +110,10 @@
 //! }
 //!
 //! fn array_from_unaligned_bytes(buf: &[u8]) -> Vec<ArrayEntry> {
-//!		let length = buf.len() / mem::size_of::<ArrayEntry>();
-//! 	let mut result = vec![ArrayEntry::default(); length];
-//!  	(&mut result).copy_from_bytes(buf).expect("Cannot fail here.");
-//!		result
+//!    let length = buf.len() / mem::size_of::<ArrayEntry>();
+//!    let mut result = vec![ArrayEntry::default(); length];
+//!    (&mut result).copy_from_bytes(buf).expect("Cannot fail here.");
+//!    result
 //! }
 //!
 //! # fn main() {}
@@ -140,15 +139,16 @@
 #![no_std]
 
 mod error;
-pub use error::Error;
+pub use crate::error::Error;
 
 mod plain;
-pub use plain::Plain;
+pub use crate::plain::Plain;
 
 mod methods;
-pub use methods::{as_bytes, as_mut_bytes, copy_from_bytes, from_bytes, from_mut_bytes, is_aligned,
-                  slice_from_bytes, slice_from_bytes_len, slice_from_mut_bytes,
-                  slice_from_mut_bytes_len};
+pub use crate::methods::{
+    as_bytes, as_mut_bytes, copy_from_bytes, from_bytes, from_mut_bytes, is_aligned,
+    slice_from_bytes, slice_from_bytes_len, slice_from_mut_bytes, slice_from_mut_bytes_len,
+};
 
 #[cfg(test)]
 #[macro_use]
